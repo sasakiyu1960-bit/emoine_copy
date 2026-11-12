@@ -1,0 +1,14 @@
+.idea
+.DS_Store
+*.pb.go
+
+node_modules
+.DS_Store
+dist
+*.local
+
+.vscode
+
+/client/src/lib/pb/**
+!/client/src/lib/pb/index.ts
+/client/src/lib/apis/generated/**

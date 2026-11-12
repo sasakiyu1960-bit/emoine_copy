@@ -1,0 +1,566 @@
+openapi: 3.0.3
+info:
+  title: Emoine
+  version: '1.0'
+  description: Emoine API
+
+paths:
+  '/oauth2/callback':
+    parameters:
+      - name: code
+        in: query
+        required: true
+        description: OAuth2.0のcode
+        schema:
+          type: string
+      - $ref: '#/components/parameters/sessions'
+
+    get:
+      tags:
+        - oauth2
+      summary: OAuthのコールバック先
+      operationId: callback
+      responses:
+        '200':
+          description: OK
+        '302':
+          description: Found
+
+  '/oauth2/generate/code':
+    get:
+      tags:
+        - oauth2
+      summary: Code Challenge用Codeの生成
+      responses:
+        '200':
+          description: OK
+
+  '/users/me':
+    get:
+      operationId: getMe
+      summary: 自身のユーザー詳細情報を取得
+      tags:
+        - me
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  '/viewer':
+      get:
+        operationId: getViewer
+        summary: 自身のユーザー詳細情報を取得
+        tags:
+          - viewer
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Viewer'
+
+  '/state':
+    parameters:
+      - name: state
+        in: query
+        required: true
+        description: 進行状況
+        schema:
+          $ref: '#/components/schemas/StateChangeType'
+
+    post:
+      operationId: postState
+      summary: 進行状況を変更
+      tags:
+        - state
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+
+  '/live-id':
+    get:
+      operationId: getLiveId
+      summary: Youtubeのライブ配信のID
+      tags:
+        - live
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveId'
+
+    put:
+      operationId: putLiveId
+      summary: Youtubeのライブ配信のIDの変更
+      tags:
+        - live
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/LiveId'
+      responses:
+        '200':
+          description: Updated
+
+  '/presentations':
+    get:
+      operationId: getPresentations
+      summary: プレゼンテーション一覧とその詳細情報を取得
+      tags:
+        - presentation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Presentation'
+
+    post:
+      operationId: postPresentations
+      summary: プレゼンテーションを追加
+      tags:
+        - presentation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePresentation'
+      responses:
+        '201':
+          description: Created
+        '409':
+          description: Conflict
+
+  '/presentations/{presentationId}':
+    parameters:
+      - $ref: '#/components/parameters/presentationId'
+
+    get:
+      operationId: getPresentation
+      summary: プレゼンテーションの詳細情報を取得
+      tags:
+        - presentation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Presentation'
+        '404':
+          description: Not Found
+
+    patch:
+      operationId: editPresentation
+      summary: プレゼンテーションの詳細情報を変更
+      tags:
+        - presentation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Presentation'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Presentation'
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+
+    delete:
+      operationId: deletePresentation
+      summary: プレゼンテーションを削除
+      tags:
+        - presentation
+      responses:
+        '204':
+          description: |-
+            No Content
+            正常に削除できました。
+        '404':
+          description: Not Found
+
+  '/presentations/{presentationId}/reaction':
+    parameters:
+      - $ref: '#/components/parameters/presentationId'
+
+    get:
+      operationId: getPresentationReactions
+      summary: プレゼンテーションのリアクション統計を取得
+      tags:
+        - presentation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReactionStatistics'
+        '404':
+          description: Not Found
+
+  '/presentations/{presentationId}/review':
+    parameters:
+      - $ref: '#/components/parameters/presentationId'
+
+    get:
+      operationId: getPresentationReviews
+      summary: プレゼンテーションのレビュー統計を取得
+      tags:
+        - presentation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewStatistics'
+        '404':
+          description: Not Found
+
+    post:
+      operationId: postPresentationReview
+      summary: プレゼンテーションのレビューを追加
+      tags:
+        - presentation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '201':
+          description: Created
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+
+    patch:
+      operationId: editPresentationReview
+      summary: プレゼンテーションのレビューを変更
+      tags:
+        - presentation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+
+  '/presentations/{presentationId}/comments':
+    parameters:
+      - $ref: '#/components/parameters/presentationId'
+
+    get:
+      operationId: getPresentationComments
+      summary: プレゼンテーションのコメント一覧を取得
+      tags:
+        - presentation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '404':
+          description: Not Found
+
+  '/tokens':
+    post:
+      operationId: createToken
+      summary: アクセストークンの生成
+      description: アクセストークンの生成をします。生成したトークンの有効期限は1日です。
+      tags:
+        - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateToken'
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+
+components:
+  parameters:
+    sessions:
+      name: sessions
+      in: cookie
+      required: false
+      schema:
+        type: string
+    presentationId:
+      name: presentationId
+      in: path
+      required: true
+      description: プレゼンテーションID
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    StateChangeType:
+      type: string
+      enum:
+        - next
+        - pause
+        - resume
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      required:
+        - id
+      description: ユーザー
+    Viewer:
+      type: object
+      properties:
+        count:
+          type: number
+      required:
+        - count
+      description: ビューワー
+    CreatePresentation:
+      type: object
+      properties:
+        name:
+          type: string
+        speakers:
+          type: string
+        description:
+          type: string
+          minLength: 0
+          maxLength: 140
+      required:
+        - name
+        - speakers
+        - description
+      description: 発表情報
+    Presentation:
+      type: object
+      properties:
+        id:
+          type: number
+          readOnly: true
+        name:
+          type: string
+        speakers:
+          type: string
+        description:
+          type: string
+          minLength: 0
+          maxLength: 140
+        prev:
+          type: number
+          nullable: true
+          description: 前の発表のID
+        next:
+          type: number
+          nullable: true
+          description: 次の発表のID
+      required:
+        - id
+        - name
+        - speakers
+        - description
+        - prev
+        - next
+      description: 発表情報
+    ReactionStatistics:
+      type: object
+      properties:
+        presentationId:
+          type: number
+        counts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReactionCounts'
+          nullable: true
+      required:
+        - presentationId
+        - counts
+      description: リアクションの統計情報
+    ReactionCounts:
+      type: object
+      properties:
+        stamp:
+          $ref: '#/components/schemas/Stamp'
+        count:
+          type: number
+      required:
+        - stamp
+        - count
+    # Reaction:
+    #   type: object
+    #   properties:
+    #     id:
+    #       type: number
+    #     userId:
+    #       type: string
+    #       format: uuid
+    #     presentationId:
+    #       type: number
+    #     stamp:
+    #       $ref: '#/components/schemas/Stamp'
+    #   required:
+    #     - id
+    #     - userId
+    #     - presentationId
+    #     - stamp
+    #   description: リアクション
+    Stamp:
+      type: number
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+      x-enum-varnames:
+        - iine
+        - pro
+        - emoi
+        - kandoushita
+        - sugoi
+        - kami
+        - suko
+        - yosa
+        - kusa
+    Review:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          readOnly: true
+        skill:
+          type: number
+          minimum: 1
+          maximum: 5
+        artistry:
+          type: number
+          minimum: 1
+          maximum: 5
+        idea:
+          type: number
+          minimum: 1
+          maximum: 5
+        presentation:
+          type: number
+          minimum: 1
+          maximum: 5
+      required:
+        - userId
+        - skill
+        - artistry
+        - idea
+        - presentation
+      description: レビュー
+    ReviewStatistics:
+      type: object
+      properties:
+        presentationId:
+          type: number
+        count:
+          type: number
+        avgSkill:
+          type: number
+          minimum: 1
+          maximum: 5
+        avgArtistry:
+          type: number
+          minimum: 1
+          maximum: 5
+        avgIdea:
+          type: number
+          minimum: 1
+          maximum: 5
+        avgPresentation:
+          type: number
+          minimum: 1
+          maximum: 5
+      required:
+        - presentationId
+        - count
+        - avgSkill
+        - avgArtistry
+        - avgIdea
+        - avgPresentation
+      description: レビュー統計情報
+    Comment:
+      type: object
+      properties:
+        id:
+          type: number
+          readOnly: true
+        userId:
+          type: string
+          format: uuid
+          readOnly: true
+        presentationId:
+          type: number
+        text:
+          type: string
+      required:
+        - id
+        - userId
+        - presentationId
+        - text
+      description: コメント
+    LiveId:
+      type: object
+      properties:
+        liveId:
+          type: string
+      required:
+        - liveId
+    CreateToken:
+      type: object
+      properties: {}
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - BearerAuth: []

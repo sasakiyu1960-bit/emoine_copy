@@ -1,0 +1,10 @@
+.idea
+.DS_Store
+
+**/node_modules
+.DS_Store
+dist
+
+/client/src/lib/pb/**
+!/client/src/lib/pb/index.ts
+/client/src/lib/apis/generated/**

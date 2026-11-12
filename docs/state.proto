@@ -1,0 +1,14 @@
+syntax = "proto3";
+option go_package = "./router;router";
+
+message State {
+  Status status = 1;
+  string info = 2;
+  uint32 presentationId = 3;
+}
+
+enum Status {
+  speaking = 0;
+  reviewing = 1;
+  pause = 2;
+}
